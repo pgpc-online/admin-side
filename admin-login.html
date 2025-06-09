@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin Login - YourApp</title>
+  <style>
+    /* Reset and base */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: #ffffff;
+      color: #6b7280;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+    .container {
+      max-width: 400px;
+      width: 100%;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+      padding: 3rem 2.5rem 3.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 {
+      font-size: 3rem;
+      font-weight: 700;
+      color: #111827;
+      margin-bottom: 0.5rem;
+      text-align: center;
+      line-height: 1.1;
+      user-select: none;
+    }
+    p.subtitle {
+      font-size: 1.125rem;
+      color: #9ca3af;
+      margin-bottom: 2.5rem;
+      text-align: center;
+      user-select: none;
+    }
+    form {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    label {
+      font-weight: 600;
+      font-size: 1rem;
+      color: #374151;
+      margin-bottom: 0.35rem;
+      display: block;
+    }
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 0.85rem 1.1rem;
+      font-size: 1.125rem;
+      border: 1px solid #d1d5db;
+      border-radius: 0.75rem;
+      transition: border-color 0.3s ease;
+      font-family: inherit;
+    }
+    input[type="email"]:focus,
+    input[type="password"]:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.3);
+    }
+    button {
+      background-color: #111827;
+      color: white;
+      border: none;
+      border-radius: 0.75rem;
+      padding: 0.85rem;
+      font-size: 1.25rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      user-select: none;
+    }
+    button:hover,
+    button:focus {
+      background-color: #2563eb;
+      transform: scale(1.05);
+      outline: none;
+    }
+    .message {
+      margin-top: 1rem;
+      font-weight: 600;
+      text-align: center;
+      min-height: 1.5rem;
+      color: #dc2626;
+      user-select: none;
+    }
+    .toggle-auth {
+      margin-top: 2rem;
+      font-size: 1rem;
+      color: #6b7280;
+      text-align: center;
+      user-select: none;
+    }
+    .toggle-auth button {
+      background: none;
+      border: none;
+      color: #2563eb;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 0;
+      margin-left: 0.25rem;
+      font-size: 1rem;
+      user-select: none;
+      transition: color 0.3s ease;
+    }
+    .toggle-auth button:hover,
+    .toggle-auth button:focus {
+      text-decoration: underline;
+      outline: none;
+    }
+  </style>
+</head>
+<body>
+  <main class="container" role="main" aria-label="Admin login area">
+    <h1>Admin Login</h1>
+    <p class="subtitle">Sign in to access the admin dashboard</p>
+
+    <form id="auth-form" aria-label="Admin login form" novalidate>
+      <label for="email">Email address</label>
+      <input
+        type="email"
+        id="email"
+        name="email"
+        placeholder="admin@example.com"
+        autocomplete="username"
+        required
+        aria-required="true"
+        aria-describedby="email-desc"
+      />
+      <div id="email-desc" class="visually-hidden">Enter your admin email address</div>
+
+      <label for="password">Password</label>
+      <input
+        type="password"
+        id="password"
+        name="password"
+        placeholder="••••••••"
+        autocomplete="current-password"
+        required
+        aria-required="true"
+        minlength="6"
+        aria-describedby="password-desc"
+      />
+      <div id="password-desc" class="visually-hidden">Enter your password, minimum 6 characters</div>
+
+      <button type="submit" id="submit-btn" aria-live="polite">Login</button>
+    </form>
+
+    <div class="message" id="message" role="alert" aria-live="assertive" aria-atomic="true"></div>
+
+    <div class="toggle-auth">
+      <span id="toggle-text">Don't have an account?</span>
+      <button id="toggle-btn" aria-label="Toggle between login and signup">Sign up</button>
+    </div>
+  </main>
+
+  <style>
+    /* visually-hidden for accessibility */
+    .visually-hidden {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      padding: 0 !important;
+      margin: -1px !important;
+      overflow: hidden !important;
+      clip: rect(0, 0, 0, 0) !important;
+      white-space: nowrap !important;
+      border: 0 !important;
+    }
+  </style>
+
+  <!-- Firebase App (core Firebase SDK) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <!-- Firebase Auth SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+  <script>
+    // Your Firebase project configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyB9oTiiW5iXfiDgcyrEktTBkEh1ZFmZ7Pc",
+      authDomain: "flipbook-a5350.firebaseapp.com",
+      databaseURL: "https://flipbook-a5350-default-rtdb.firebaseio.com",
+      projectId: "flipbook-a5350",
+      storageBucket: "flipbook-a5350.appspot.com",
+      messagingSenderId: "570378601966",
+      appId: "1:570378601966:web:96ebb77badba7e33107aff",
+      measurementId: "G-LCKP7BY0L7"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    const form = document.getElementById('auth-form');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const submitBtn = document.getElementById('submit-btn');
+    const messageDiv = document.getElementById('message');
+    const toggleBtn = document.getElementById('toggle-btn');
+    const toggleText = document.getElementById('toggle-text');
+
+    let isLogin = true; // tracks mode: login or signup
+
+    // Accessibility: focus management helper
+    function focusMessage() {
+      messageDiv.focus();
+    }
+
+    // Toggle between login and signup modes
+    toggleBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      isLogin = !isLogin;
+      if (isLogin) {
+        submitBtn.textContent = 'Login';
+        toggleText.textContent = "Don't have an account?";
+        toggleBtn.textContent = 'Sign up';
+        passwordInput.autocomplete = "current-password";
+      } else {
+        submitBtn.textContent = 'Sign up';
+        toggleText.textContent = "Already have an account?";
+        toggleBtn.textContent = 'Login';
+        passwordInput.autocomplete = "new-password";
+      }
+      messageDiv.textContent = '';
+      messageDiv.className = 'message';
+      emailInput.focus();
+    });
+
+    // Handle form submit
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+
+      // Clear previous messages
+      messageDiv.textContent = '';
+      messageDiv.className = 'message';
+      submitBtn.disabled = true;
+      submitBtn.textContent = isLogin ? 'Logging in...' : 'Signing up...';
+
+      try {
+        let userCredential;
+        if (isLogin) {
+          userCredential = await auth.signInWithEmailAndPassword(email, password);
+        } else {
+          userCredential = await auth.createUserWithEmailAndPassword(email, password);
+        }
+        messageDiv.textContent = '';
+        // On successful login/signup redirect to adminhome.html
+        window.location.href = 'adminhome.html';
+      } catch (error) {
+        // Show friendly error message
+        let friendlyMessage = 'An error occurred. Please try again.';
+        switch(error.code) {
+          case 'auth/invalid-email':
+            friendlyMessage = 'Invalid email address format.';
+            break;
+          case 'auth/user-disabled':
+            friendlyMessage = 'This user has been disabled.';
+            break;
+          case 'auth/user-not-found':
+            friendlyMessage = 'User not found. Please sign up.';
+            break;
+          case 'auth/wrong-password':
+            friendlyMessage = 'Incorrect password.';
+            break;
+          case 'auth/email-already-in-use':
+            friendlyMessage = 'Email is already registered. Please login.';
+            break;
+          case 'auth/weak-password':
+            friendlyMessage = 'Password should be at least 6 characters.';
+            break;
+          default:
+            friendlyMessage = error.message || friendlyMessage;
+        }
+        messageDiv.textContent = friendlyMessage;
+        messageDiv.className = 'message error';
+        focusMessage();
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = isLogin ? 'Login' : 'Sign up';
+      }
+    });
+
+    // If user is already logged in, redirect immediately to adminhome.html
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        window.location.href = 'adminhome.html';
+      }
+    });
+  </script>
+</body>
+</html>
+
