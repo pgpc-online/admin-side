@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin Dashboard - YourApp</title>
+  <style>
+    /* Base and reset */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: #ffffff;
+      color: #6b7280;
+      line-height: 1.6;
+      font-size: 18px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+    /* Sticky top nav */
+    header {
+      position: sticky;
+      top: 0;
+      backdrop-filter: saturate(180%) blur(10px);
+      background: rgba(255 255 255 / 0.8);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      z-index: 100;
+    }
+    nav {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 2rem;
+    }
+    .logo {
+      font-weight: 800;
+      font-size: 1.5rem;
+      color: #111827;
+      letter-spacing: 0.04em;
+      user-select: none;
+    }
+    .nav-links {
+      display: flex;
+      gap: 1.5rem;
+      font-weight: 600;
+      font-size: 1rem;
+      color: #374151;
+    }
+    .nav-links a {
+      transition: color 0.3s ease;
+    }
+    .nav-links a:hover,
+    .nav-links a:focus {
+      color: #2563eb;
+    }
+
+    /* Main container */
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 4rem 2rem 6rem;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 3.5rem;
+    }
+    /* Hero section */
+    .hero {
+      text-align: center;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    .hero h1 {
+      font-size: 3rem;
+      font-weight: 700;
+      color: #111827;
+      margin-bottom: 1rem;
+      line-height: 1.1;
+    }
+    .hero p {
+      color: #6b7280;
+      font-size: 1.125rem;
+      margin-bottom: 2rem;
+    }
+    .hero button {
+      background-color: #111827;
+      color: white;
+      border: none;
+      border-radius: 0.75rem;
+      padding: 0.9rem 2rem;
+      font-size: 1.125rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      user-select: none;
+    }
+    .hero button:hover,
+    .hero button:focus {
+      background-color: #2563eb;
+      transform: scale(1.05);
+      outline: none;
+    }
+
+    /* Grid for cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 2.5rem;
+    }
+    .card {
+      background: #f9fafb;
+      border-radius: 0.75rem;
+      padding: 2rem;
+      box-shadow: 0 10px 15px rgba(0,0,0,0.05);
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+      transition: box-shadow 0.3s ease, transform 0.2s ease;
+    }
+    .card:hover,
+    .card:focus-within {
+      box-shadow: 0 20px 25px rgba(37, 99, 235, 0.15);
+      transform: translateY(-6px);
+      outline: none;
+    }
+    .card h2 {
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: #111827;
+      margin: 0;
+    }
+    .card .value {
+      font-weight: 800;
+      font-size: 2.5rem;
+      color: #2563eb;
+      user-select: all;
+    }
+    .card button {
+      margin-top: auto;
+      background: none;
+      border: 2px solid #2563eb;
+      color: #2563eb;
+      font-weight: 600;
+      padding: 0.5rem 1rem;
+      border-radius: 0.6rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease, color 0.3s ease;
+      align-self: stretch;
+    }
+    .card button:hover,
+    .card button:focus {
+      background-color: #2563eb;
+      color: white;
+      outline: none;
+    }
+
+    /* Simple line chart placeholder */
+    .chart-placeholder {
+      font-size: 0.9rem;
+      color: #9ca3af;
+      text-align: center;
+      margin-top: 1rem;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      color: #9ca3af;
+      padding: 2rem 1rem 2rem;
+      font-size: 0.9rem;
+      user-select: none;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      main {
+        padding: 2rem 1rem 4rem;
+      }
+      .hero h1 {
+        font-size: 2.25rem;
+      }
+      .hero button {
+        width: 100%;
+      }
+      .card button {
+        align-self: center;
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header role="banner">
+    <nav role="navigation" aria-label="Primary navigation">
+      <div class="logo" tabindex="0">YourApp Admin</div>
+      <div class="nav-links">
+        <a href="#" tabindex="0">Dashboard</a>
+        <a href="#" tabindex="0">Students</a>
+        <a href="#" tabindex="0">Statistics</a>
+        <a href="#" id="logout-btn" tabindex="0" role="button">Logout</a>
+      </div>
+    </nav>
+  </header>
+
+  <main role="main" aria-label="Admin dashboard main content">
+    <section class="hero" aria-label="Hero section">
+      <h1>Welcome to Admin Dashboard</h1>
+      <p>Manage student information, review statuses, and explore insightful statistics—all from one place.</p>
+      <button id="refresh-btn" aria-label="Refresh statistics">Refresh Data</button>
+    </section>
+
+    <section class="stats-grid" aria-label="Key statistics cards">
+      <article class="card" tabindex="0" role="region" aria-labelledby="students-info">
+        <h2 id="students-info">Total Students</h2>
+        <div class="value" id="total-students">---</div>
+        <button id="view-students-btn" aria-describedby="students-info">See Student Info</button>
+      </article>
+      <article class="card" tabindex="0" role="region" aria-labelledby="pending-status">
+        <h2 id="pending-status">Pending for Examination</h2>
+        <div class="value" id="pending-exam">---</div>
+        <button id="view-pending-btn" aria-describedby="pending-status">See Pending Students</button>
+      </article>
+      <article class="card" tabindex="0" role="region" aria-labelledby="gender-stats">
+        <h2 id="gender-stats">Gender Distribution</h2>
+        <div class="value" id="gender-stats-val">---</div>
+        <div class="chart-placeholder" aria-hidden="true">Female: ---, Male: ---</div>
+      </article>
+      <article class="card" tabindex="0" role="region" aria-labelledby="garciano-status">
+        <h2 id="garciano-status">Garciano vs Non-Garciano</h2>
+        <div class="value" id="garciano-stats-val">---</div>
+      </article>
+    </section>
+  </main>
+
+  <footer role="contentinfo">
+    © 2024 YourApp. All rights reserved.
+  </footer>
+
+  <!-- Firebase scripts must be added on demand if integrated -->
+  <script>
+    // Dummy data for demo; replace these by fetching from your Firebase database
+    const data = {
+      totalStudents: 240,
+      pendingExams: 35,
+      gender: { female: 120, male: 120 },
+      garciano: { garciano: 160, nonGarciano: 80 }
+    };
+
+    // DOM elements
+    const totalStudentsEl = document.getElementById('total-students');
+    const pendingExamEl = document.getElementById('pending-exam');
+    const genderStatsValEl = document.getElementById('gender-stats-val');
+    const garcianoStatsValEl = document.getElementById('garciano-stats-val');
+    const genderChartPlaceholder = document.querySelector('.chart-placeholder');
+
+    function updateStats() {
+      totalStudentsEl.textContent = data.totalStudents;
+      pendingExamEl.textContent = data.pendingExams;
+      genderStatsValEl.textContent = `Female: ${data.gender.female}, Male: ${data.gender.male}`;
+      genderChartPlaceholder.textContent = `Female: ${data.gender.female}, Male: ${data.gender.male}`;
+      garcianoStatsValEl.textContent = `Garciano: ${data.garciano.garciano}, Non-Garciano: ${data.garciano.nonGarciano}`;
+    }
+
+    // Refresh button to simulate data refresh
+    const refreshBtn = document.getElementById('refresh-btn');
+    refreshBtn.addEventListener('click', () => {
+      // Here you would fetch new data from Firebase and update the UI
+      // For demo, just update with the current dummy data again
+      updateStats();
+      alert('Statistics refreshed!');
+    });
+
+    // "See Student Info" and "See Pending Students" buttons can link or open relevant pages or modals
+    document.getElementById('view-students-btn').addEventListener('click', () => {
+      alert('Redirect or show student info page - To be implemented');
+    });
+    document.getElementById('view-pending-btn').addEventListener('click', () => {
+      alert('Redirect or show pending students page - To be implemented');
+    });
+
+    // Logout button dummy handler - replace with Firebase auth sign out logic if used
+    document.getElementById('logout-btn').addEventListener('click', () => {
+      // Example: firebase.auth().signOut() then redirect to login
+      alert('Logout function to be implemented');
+      // window.location.href = 'admin-login.html';
+    });
+
+    // Initialize stats on page load
+    updateStats();
+  </script>
+</body>
+</html>
+
