@@ -3,7 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Admin Dashboard - YourApp</title>
+  <title>Admin Dashboard - pgpc</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
   <style>
     /* Base and reset */
     *, *::before, *::after {
@@ -12,10 +16,9 @@
     body {
       margin: 0;
       font-family: 'Inter', sans-serif;
-      background: #ffffff;
+      background: #f5f7fa;
       color: #6b7280;
       line-height: 1.6;
-      font-size: 18px;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
@@ -29,7 +32,7 @@
       position: sticky;
       top: 0;
       backdrop-filter: saturate(180%) blur(10px);
-      background: rgba(255 255 255 / 0.8);
+      background: rgba(255, 255, 255, 0.8);
       box-shadow: 0 2px 8px rgba(0,0,0,0.05);
       z-index: 100;
     }
@@ -45,8 +48,6 @@
       font-weight: 800;
       font-size: 1.5rem;
       color: #111827;
-      letter-spacing: 0.04em;
-      user-select: none;
     }
     .nav-links {
       display: flex;
@@ -62,7 +63,18 @@
     .nav-links a:focus {
       color: #2563eb;
     }
-
+    .logout-btn {
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 15px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .logout-btn:hover {
+      background-color: #c82333;
+    }
     /* Main container */
     main {
       max-width: 1200px;
@@ -76,15 +88,12 @@
     /* Hero section */
     .hero {
       text-align: center;
-      max-width: 700px;
-      margin: 0 auto;
     }
     .hero h1 {
       font-size: 3rem;
       font-weight: 700;
       color: #111827;
       margin-bottom: 1rem;
-      line-height: 1.1;
     }
     .hero p {
       color: #6b7280;
@@ -101,15 +110,12 @@
       font-weight: 700;
       cursor: pointer;
       transition: background-color 0.3s ease, transform 0.2s ease;
-      user-select: none;
     }
     .hero button:hover,
     .hero button:focus {
       background-color: #2563eb;
       transform: scale(1.05);
-      outline: none;
     }
-
     /* Grid for cards */
     .stats-grid {
       display: grid;
@@ -125,13 +131,6 @@
       flex-direction: column;
       align-items: flex-start;
       gap: 1rem;
-      transition: box-shadow 0.3s ease, transform 0.2s ease;
-    }
-    .card:hover,
-    .card:focus-within {
-      box-shadow: 0 20px 25px rgba(37, 99, 235, 0.15);
-      transform: translateY(-6px);
-      outline: none;
     }
     .card h2 {
       font-weight: 700;
@@ -143,59 +142,35 @@
       font-weight: 800;
       font-size: 2.5rem;
       color: #2563eb;
-      user-select: all;
     }
-    .card button {
-      margin-top: auto;
-      background: none;
-      border: 2px solid #2563eb;
-      color: #2563eb;
-      font-weight: 600;
-      padding: 0.5rem 1rem;
-      border-radius: 0.6rem;
-      cursor: pointer;
-      transition: background-color 0.3s ease, color 0.3s ease;
-      align-self: stretch;
+    /* Chart styles */
+    .chart-container {
+      position: relative;
+      max-width: 600px;
+      margin: auto;
     }
-    .card button:hover,
-    .card button:focus {
+    /* Table styles */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: white;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ccc;
+      text-align: left;
+    }
+    th {
       background-color: #2563eb;
-      color: white;
-      outline: none;
+      color: #fff;
     }
-
-    /* Simple line chart placeholder */
-    .chart-placeholder {
-      font-size: 0.9rem;
-      color: #9ca3af;
-      text-align: center;
-      margin-top: 1rem;
-    }
-
     /* Footer */
     footer {
       text-align: center;
       color: #9ca3af;
       padding: 2rem 1rem 2rem;
       font-size: 0.9rem;
-      user-select: none;
-    }
-
-    /* Responsive */
-    @media (max-width: 600px) {
-      main {
-        padding: 2rem 1rem 4rem;
-      }
-      .hero h1 {
-        font-size: 2.25rem;
-      }
-      .hero button {
-        width: 100%;
-      }
-      .card button {
-        align-self: center;
-        width: 100%;
-      }
     }
   </style>
 </head>
@@ -203,11 +178,11 @@
   <header role="banner">
     <nav role="navigation" aria-label="Primary navigation">
       <div class="logo" tabindex="0">YourApp Admin</div>
-      <div class="nav-links">
+      <div class="nav-links" id="primary-navigation">
         <a href="#" tabindex="0">Dashboard</a>
         <a href="#" tabindex="0">Students</a>
         <a href="#" tabindex="0">Statistics</a>
-        <a href="#" id="logout-btn" tabindex="0" role="button">Logout</a>
+        <button class="logout-btn" id="logout-btn" tabindex="0">Logout</button>
       </div>
     </nav>
   </header>
@@ -232,72 +207,176 @@
       </article>
       <article class="card" tabindex="0" role="region" aria-labelledby="gender-stats">
         <h2 id="gender-stats">Gender Distribution</h2>
-        <div class="value" id="gender-stats-val">---</div>
-        <div class="chart-placeholder" aria-hidden="true">Female: ---, Male: ---</div>
+        <div class="chart-container">
+          <canvas id="genderChart"></canvas>
+        </div>
+      </article>
+      <article class="card" tabindex="0" role="region" aria-labelledby="course-stats">
+        <h2 id="course-stats">Course Distribution</h2>
+        <div class="chart-container">
+          <canvas id="courseChart"></canvas>
+        </div>
       </article>
       <article class="card" tabindex="0" role="region" aria-labelledby="garciano-status">
         <h2 id="garciano-status">Garciano vs Non-Garciano</h2>
         <div class="value" id="garciano-stats-val">---</div>
       </article>
     </section>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Photo</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Gender</th>
+          <th>Course</th>
+          <th>Guardian</th>
+          <th>Address</th>
+          <th>Birthdate</th>
+          <th>Phone</th>
+          <th>Submitted At</th>
+        </tr>
+      </thead>
+      <tbody id="studentTable">
+        <!-- Student rows go here -->
+      </tbody>
+    </table>
   </main>
 
   <footer role="contentinfo">
     © 2024 YourApp. All rights reserved.
   </footer>
 
-  <!-- Firebase scripts must be added on demand if integrated -->
   <script>
-    // Dummy data for demo; replace these by fetching from your Firebase database
-    const data = {
-      totalStudents: 240,
-      pendingExams: 35,
-      gender: { female: 120, male: 120 },
-      garciano: { garciano: 160, nonGarciano: 80 }
+    const firebaseConfig = {
+      apiKey: "AIzaSyB9oTiiW5iXfiDgcyrEktTBkEh1ZFmZ7Pc",
+      authDomain: "flipbook-a5350.firebaseapp.com",
+      projectId: "flipbook-a5350",
+      storageBucket: "flipbook-a5350.appspot.com",
+      messagingSenderId: "570378601966",
+      appId: "1:570378601966:web:96ebb77badba7e33107aff"
     };
 
-    // DOM elements
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const table = document.getElementById("studentTable");
     const totalStudentsEl = document.getElementById('total-students');
     const pendingExamEl = document.getElementById('pending-exam');
-    const genderStatsValEl = document.getElementById('gender-stats-val');
+    const genderChartEl = document.getElementById('genderChart');
+    const courseChartEl = document.getElementById('courseChart');
     const garcianoStatsValEl = document.getElementById('garciano-stats-val');
-    const genderChartPlaceholder = document.querySelector('.chart-placeholder');
 
-    function updateStats() {
-      totalStudentsEl.textContent = data.totalStudents;
-      pendingExamEl.textContent = data.pendingExams;
-      genderStatsValEl.textContent = `Female: ${data.gender.female}, Male: ${data.gender.male}`;
-      genderChartPlaceholder.textContent = `Female: ${data.gender.female}, Male: ${data.gender.male}`;
-      garcianoStatsValEl.textContent = `Garciano: ${data.garciano.garciano}, Non-Garciano: ${data.garciano.nonGarciano}`;
+    let total = 0, male = 0, female = 0;
+    const courseStats = {};
+
+    db.collection("studentApplications").orderBy("submittedAt", "desc").get().then((querySnapshot) => {
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        total++;
+
+        const gender = data.studentSex || "";
+        if (gender === "Male") male++;
+        if (gender === "Female") female++;
+
+        const course = data.studentCourse || "N/A";
+        courseStats[course] = (courseStats[course] || 0) + 1;
+
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td><img src="${data.photoURL || 'https://via.placeholder.com/50'}" width="50" height="50"></td>
+          <td>${data.firstName || "N/A"}</td>
+          <td>${data.studentEmail || "N/A"}</td>
+          <td>${gender}</td>
+          <td>${course}</td>
+          <td>${data.guardianName || ''}</td>
+          <td>${data.studentAddress || ''}</td>
+          <td>${data.studentDate || ''}</td>
+          <td>${data.studentNumber || ''}</td>
+          <td>${data.submittedAt?.toDate().toLocaleString() || "Pending"}</td>
+        `;
+        table.appendChild(row);
+      });
+
+      // Update stats
+      totalStudentsEl.textContent = total;
+      pendingExamEl.textContent = 35; // Dummy value for pending exams
+      garcianoStatsValEl.textContent = `Garciano: 160, Non-Garciano: 80`; // Dummy value for Garciano stats
+
+      // Render gender distribution chart
+      renderGenderChart(male, female);
+      // Render course distribution chart
+      renderCourseChart(courseStats);
+    }).catch((error) => {
+      console.error("Error fetching data:", error);
+    });
+
+    function renderGenderChart(male, female) {
+      const ctx = genderChartEl.getContext('2d');
+      new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: ['Male', 'Female'],
+          datasets: [{
+            data: [male, female],
+            backgroundColor: ['#007bff', '#ff6f61'],
+            hoverOffset: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'top',
+            },
+            title: {
+              display: true,
+              text: 'Gender Distribution'
+            }
+          }
+        }
+      });
     }
 
-    // Refresh button to simulate data refresh
-    const refreshBtn = document.getElementById('refresh-btn');
-    refreshBtn.addEventListener('click', () => {
-      // Here you would fetch new data from Firebase and update the UI
-      // For demo, just update with the current dummy data again
-      updateStats();
-      alert('Statistics refreshed!');
+    function renderCourseChart(courseStats) {
+      const ctx = courseChartEl.getContext('2d');
+      const labels = Object.keys(courseStats);
+      const data = Object.values(courseStats);
+      new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: data,
+            backgroundColor: ['#28a745', '#ffc107', '#17a2b8', '#dc3545'], // Add more colors as needed
+            hoverOffset: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'top',
+            },
+            title: {
+              display: true,
+              text: 'Course Distribution'
+            }
+          }
+        }
+      });
+    }
+
+    document.getElementById('refresh-btn').addEventListener('click', () => {
+      // Refresh logic can be added here
+      alert('Data refreshed!');
     });
 
-    // "See Student Info" and "See Pending Students" buttons can link or open relevant pages or modals
-    document.getElementById('view-students-btn').addEventListener('click', () => {
-      alert('Redirect or show student info page - To be implemented');
-    });
-    document.getElementById('view-pending-btn').addEventListener('click', () => {
-      alert('Redirect or show pending students page - To be implemented');
-    });
-
-    // Logout button dummy handler - replace with Firebase auth sign out logic if used
     document.getElementById('logout-btn').addEventListener('click', () => {
-      // Example: firebase.auth().signOut() then redirect to login
-      alert('Logout function to be implemented');
-      // window.location.href = 'admin-login.html';
+      // Implement your logout logic here
+      alert('Logout functionality to be implemented.');
     });
-
-    // Initialize stats on page load
-    updateStats();
   </script>
 </body>
 </html>
-
