@@ -21,7 +21,7 @@
       padding: 2rem;
     }
     .container {
-      max-width: 400px;
+      max-width: 600px;
       width: 100%;
       background: #fff;
       border-radius: 12px;
@@ -130,6 +130,7 @@
 </head>
 <body>
   <main class="container" role="main" aria-label="Admin login area">
+    <img src="templates/pgpc.png" width="70"/>
     <h1>Admin Login</h1>
     <p class="subtitle">Sign in to access the admin dashboard</p>
 
@@ -265,7 +266,7 @@
         }
         messageDiv.textContent = '';
         // On successful login/signup redirect to adminhome.html
-        window.location.href = 'adminhome.html';
+        window.location.href = 'Hero.html';
       } catch (error) {
         // Show friendly error message
         let friendlyMessage = 'An error occurred. Please try again.';
@@ -303,7 +304,7 @@
     // If user is already logged in, redirect immediately to adminhome.html
     auth.onAuthStateChanged(user => {
       if (user) {
-        window.location.href = 'adminhome.html';
+        window.location.href = 'Hero.html';
       }
     });
   </script>
