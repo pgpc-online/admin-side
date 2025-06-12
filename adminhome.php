@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin Dashboard – PGPC</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    /*... your existing CSS ...*/
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <div id="admin-profile" style="display:flex;align-items:center;gap:10px;">
+        <img id="profile-pic" src="default-admin.png" alt="Admin" width="40" height="40" style="border-radius:50%;" />
+      </div>
+      <div class="logo">PGPC Admin</div>
+      <div class="nav-links">
+        <a href="adminhome.php">Dashboard</a>
+        <a href="students.php">Students</a>
+        <a href="statistics.php">Statistics</a>
+        <button id="logout-btn" class="logout-btn">Logout</button>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <h1>Welcome to PGPC Admin Dashboard</h1>
+      <p>Manage student information, review statuses, and explore statistics.</p>
+      <button id="refresh-btn">Refresh Data</button>
+    </section>
+
+    <section class="stats-grid">
+      <article class="card">
+        <h2>Total Students</h2>
+        <div class="value" id="total-students">0</div>
+      </article>
+      <article class="card">
+        <h2>Pending for Examination</h2>
+        <div class="value" id="pending-exam">0</div>
+      </article>
+      <article class="card"><h2>Gender Distribution</h2>
+        <div><canvas id="genderChart"></canvas></div>
+      </article>
+      <article class="card"><h2>Course Distribution</h2>
+        <div><canvas id="courseChart"></canvas></div>
+      </article>
+      <article class="card"><h2>Garciano vs Non‑Garciano</h2>
+        <div><canvas id="garcianoChart"></canvas></div>
+      </article>
+    </section>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Photo</th><th>Name</th><th>Email</th><th>Gender</th><th>Course</th>
+          <th>Guardian</th><th>Address</th><th>Birthdate</th><th>Phone</th><th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="studentTable"></tbody>
+    </table>
+  </main>
+
+  <footer>© 2024 PGPC Admin Dashboard. All rights reserved.</footer>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyB9oTiiW5iXfiDgcyrEktTBkEh1ZFmZ7Pc",
+      authDomain: "flipbook-a5350.firebaseapp.com",
+      projectId: "flipbook-a5350",
+      storageBucket: "flipbook-a5350.appspot.com",
+      messagingSenderId: "570378601966",
+      appId: "1:570378601966:web:96ebb77badba7e33107aff"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+
+    const totalEl = document.getElementById('total-students');
+    const pendingEl = document.getElementById('pending-exam');
+    const studentTbody = document.getElementById('studentTable');
+    const profilePic = document.getElementById('profile-pic');
+
+    const charts = {
+      gender: new Chart(document.getElementById('genderChart'), {type:'doughnut', data:{labels:[],datasets:[{data:[],backgroundColor:['#3498db','#e74c3c']}]}}),
+      course: new Chart(document.getElementById('courseChart'), {type:'bar', data:{labels:[],datasets:[{data:[],backgroundColor:'#2ecc71'}]}}),
+      garciano: new Chart(document.getElementById('garcianoChart'), {type:'pie', data:{labels:['Garciano','Non-Garciano'],datasets:[{data:[0,0],backgroundColor:['#9b59b6','#f1c40f']}]}})
+    };
+
+    async function loadData() {
+      const snapshot = await db.collection('students').get();
+      const stats = { pending:0, gender:{}, course:{}, garciano:0, nonG:0 };
+      studentTbody.innerHTML='';
+
+      snapshot.forEach(doc => {
+        const s = doc.data();
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td><img src="${s.photoURL||'https://via.placeholder.com/50'}" width="40"></td>
+          <td>${s.name||''}</td><td>${s.email||''}</td><td>${s.gender||''}</td>
+          <td>${s.course||''}</td><td>${s.guardian||''}</td><td>${s.address||''}</td>
+          <td>${s.birthdate||''}</td><td>${s.phone||''}</td><td>${s.status||''}</td>`;
+        studentTbody.appendChild(row);
+
+        stats.pending += s.status==='Pending'?1:0;
+        stats.gender[s.gender] = (stats.gender[s.gender]||0)+1;
+        stats.course[s.course] = (stats.course[s.course]||0)+1;
+        if ((s.barangay||'').toLowerCase() === 'garciano') stats.garciano++;
+        else stats.nonG++;
+      });
+
+      totalEl.textContent = snapshot.size;
+      pendingEl.textContent = stats.pending;
+
+      updateChart(charts.gender, stats.gender);
+      updateChart(charts.course, stats.course);
+      charts.garciano.data.datasets[0].data = [stats.garciano, stats.nonG];
+      charts.garciano.update();
+    }
+
+    function updateChart(chart, dataMap) {
+      chart.data.labels = Object.keys(dataMap);
+      chart.data.datasets[0].data = Object.values(dataMap);
+      chart.update();
+    }
+
+    document.getElementById('refresh-btn').onclick = loadData;
+    document.getElementById('logout-btn').onclick = () => auth.signOut().then(() => window.location.href='index.html');
+
+    auth.onAuthStateChanged(user => {
+      if (!user) return window.location.href = 'index.html';
+      profilePic.src = user.photoURL || 'default-admin.png';
+      loadData();
+    });
+  </script>
+</body>
+</html>
