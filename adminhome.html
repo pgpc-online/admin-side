@@ -245,7 +245,7 @@
       <th>Address</th>  
       <th>Birthdate</th>  
       <th>Phone</th>  
-      <th>Submitted At</th>  
+      <th>Status</th>  
     </tr>  
   </thead>  
   <tbody id="studentTable">  
@@ -307,7 +307,7 @@
           <td>${data.studentAddress || ''}</td>  
           <td>${data.studentDate || ''}</td>  
           <td>${data.studentNumber || ''}</td>  
-          <td>${data.submittedAt?.toDate().toLocaleString() || "Pending"}</td>  
+          <td>${"Pending"}</td>  
         `;  
         table.appendChild(row);  
       });  
