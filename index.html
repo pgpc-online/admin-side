@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -61,7 +61,8 @@
       display: block;
     }
     input[type="email"],
-    input[type="password"] {
+    input[type="password"],
+    input[type="file"] {
       width: 100%;
       padding: 0.85rem 1.1rem;
       font-size: 1.125rem;
@@ -126,6 +127,18 @@
       text-decoration: underline;
       outline: none;
     }
+    /* visually-hidden for accessibility */
+    .visually-hidden {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      padding: 0 !important;
+      margin: -1px !important;
+      overflow: hidden !important;
+      clip: rect(0, 0, 0, 0) !important;
+      white-space: nowrap !important;
+      border: 0 !important;
+    }
   </style>
 </head>
 <body>
@@ -162,6 +175,15 @@
       />
       <div id="password-desc" class="visually-hidden">Enter your password, minimum 6 characters</div>
 
+      <label for="profile-photo" id="profile-photo-label" style="display: none;">Profile Photo</label>
+      <input
+        type="file"
+        id="profile-photo"
+        name="profile-photo"
+        accept="image/*"
+        style="display: none;"
+      />
+
       <button type="submit" id="submit-btn" aria-live="polite">Login</button>
     </form>
 
@@ -172,21 +194,6 @@
       <button id="toggle-btn" aria-label="Toggle between login and signup">Sign up</button>
     </div>
   </main>
-
-  <style>
-    /* visually-hidden for accessibility */
-    .visually-hidden {
-      position: absolute !important;
-      width: 1px !important;
-      height: 1px !important;
-      padding: 0 !important;
-      margin: -1px !important;
-      overflow: hidden !important;
-      clip: rect(0, 0, 0, 0) !important;
-      white-space: nowrap !important;
-      border: 0 !important;
-    }
-  </style>
 
   <!-- Firebase App (core Firebase SDK) -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -213,6 +220,8 @@
     const form = document.getElementById('auth-form');
     const emailInput = document.getElementById('email');
     const passwordInput = document.getElementById('password');
+    const profilePhotoInput = document.getElementById('profile-photo');
+    const profilePhotoLabel = document.getElementById('profile-photo-label');
     const submitBtn = document.getElementById('submit-btn');
     const messageDiv = document.getElementById('message');
     const toggleBtn = document.getElementById('toggle-btn');
@@ -234,11 +243,15 @@
         toggleText.textContent = "Don't have an account?";
         toggleBtn.textContent = 'Sign up';
         passwordInput.autocomplete = "current-password";
+        profilePhotoInput.style.display = 'none'; // Hide profile photo input
+        profilePhotoLabel.style.display = 'none'; // Hide label
       } else {
         submitBtn.textContent = 'Sign up';
         toggleText.textContent = "Already have an account?";
         toggleBtn.textContent = 'Login';
         passwordInput.autocomplete = "new-password";
+        profilePhotoInput.style.display = 'block'; // Show profile photo input
+        profilePhotoLabel.style.display = 'block'; // Show label
       }
       messageDiv.textContent = '';
       messageDiv.className = 'message';
@@ -260,10 +273,15 @@
       try {
         let userCredential;
         if (isLogin) {
-          userCredential = await auth.signInWithEmailAndPassword(email, password);
-        } else {
-          userCredential = await auth.createUserWithEmailAndPassword(email, password);
-        }
+  userCredential = await auth.signInWithEmailAndPassword(email, password);
+} else {
+  userCredential = await auth.createUserWithEmailAndPassword(email, password);
+  // Handle profile photo upload if provided
+  const file = profilePhotoInput.files[0];
+  if (file) {
+    // You can implement the logic to upload the file to Firebase Storage here
+  }
+}
         messageDiv.textContent = '';
         // On successful login/signup redirect to adminhome.html
         window.location.href = 'adminhome.html';
@@ -278,7 +296,7 @@
             friendlyMessage = 'This user has been disabled.';
             break;
           case 'auth/user-not-found':
-            friendlyMessage = 'User not found. Please sign up.';
+            friendlyMessage = 'User  not found. Please sign up.';
             break;
           case 'auth/wrong-password':
             friendlyMessage = 'Incorrect password.';
@@ -310,4 +328,3 @@
   </script>
 </body>
 </html>
-
