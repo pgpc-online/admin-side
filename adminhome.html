@@ -179,7 +179,11 @@
 <body>
   <header role="banner">
     <nav role="navigation" aria-label="Primary navigation">
-      <div class="logo" tabindex="0"><img src="templates/pgpc.png" width="30" height="30"/>PGPC Admin</div>
+
+<div id="admin-profile" style="display: flex; align-items: center; gap: 10px;">
+  <img id="profile-pic" src="" alt="Admin" style="width: 40px; height: 40px; border-radius: 50%;" />
+</div>
+      <div class="logo" tabindex="0">PGPC Admin</div>
       <div class="nav-links" id="primary-navigation">
         <a href="#" tabindex="0">Dashboard</a>
         <a href="#" tabindex="0">Students</a>
@@ -255,6 +259,7 @@
 
   <script>
     let garciano = 0, nonGarciano = 0;
+
     const firebaseConfig = {
       apiKey: "AIzaSyB9oTiiW5iXfiDgcyrEktTBkEh1ZFmZ7Pc",
       authDomain: "flipbook-a5350.firebaseapp.com",
@@ -415,6 +420,14 @@ function renderGarcianoChart(garciano, nonGarciano) {
     }
   });
 }
+
+  firebase.auth().onAuthStateChanged((user) => {
+    if (user) {
+      const profilePic = document.getElementById("profile-pic");
+      profilePic.src = user.photoURL || "default-admin.png"; // fallback image
+    }
+  });
+
 
     document.getElementById('refresh-btn').addEventListener('click', () => {
   location.reload(); // Refresh the browser
