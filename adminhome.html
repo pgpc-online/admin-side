@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Admin Dashboard - pgpc</title>
+  <title>Admin Dashboard - YourApp</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
@@ -31,6 +31,7 @@
     header {
       position: sticky;
       top: 0;
+      width: 1250px;
       backdrop-filter: saturate(180%) blur(10px);
       background: rgba(255, 255, 255, 0.8);
       box-shadow: 0 2px 8px rgba(0,0,0,0.05);
@@ -38,7 +39,6 @@
     }
     nav {
       max-width: 1200px;
-width:100%;
       margin: 0 auto;
       display: flex;
       align-items: center;
@@ -178,7 +178,7 @@ width:100%;
 <body>
   <header role="banner">
     <nav role="navigation" aria-label="Primary navigation">
-      <div class="logo" tabindex="0">YourApp Admin</div>
+      <div class="logo" tabindex="0">PGPC Admin</div>
       <div class="nav-links" id="primary-navigation">
         <a href="#" tabindex="0">Dashboard</a>
         <a href="#" tabindex="0">Students</a>
@@ -190,7 +190,7 @@ width:100%;
 
   <main role="main" aria-label="Admin dashboard main content">
     <section class="hero" aria-label="Hero section">
-      <h1>Welcome to Admin Dashboard</h1>
+      <h1>Welcome to PGPC Admin Dashboard</h1>
       <p>Manage student information, review statuses, and explore insightful statistics—all from one place.</p>
       <button id="refresh-btn" aria-label="Refresh statistics">Refresh Data</button>
     </section>
@@ -207,11 +207,11 @@ width:100%;
         <button id="view-pending-btn" aria-describedby="pending-status">See Pending Students</button>
       </article>
       <article class="card" tabindex="0" role="region" aria-labelledby="gender-stats">
-        <h2 id="gender-stats">Gender Distribution</h2>
-        <div class="chart-container">
-          <canvas id="genderChart"></canvas>
-        </div>
-      </article>
+  <h2 id="gender-stats">Gender Distribution</h2>
+  <div class="chart-container">
+    <canvas id="genderChart"></canvas>
+  </div>
+</article>
       <article class="card" tabindex="0" role="region" aria-labelledby="course-stats">
         <h2 id="course-stats">Course Distribution</h2>
         <div class="chart-container">
@@ -219,8 +219,11 @@ width:100%;
         </div>
       </article>
       <article class="card" tabindex="0" role="region" aria-labelledby="garciano-status">
-        <h2 id="garciano-status">Garciano vs Non-Garciano</h2>
-        <div class="value" id="garciano-stats-val">---</div>
+  <div class="card garciano-distribution">
+    <h3>Garciano vs Non-Garciano Distribution</h3>
+    <canvas id="garcianoChart" class="garciano-chart"></canvas>
+  </div>
+
       </article>
     </section>
 
@@ -250,6 +253,7 @@ width:100%;
   </footer>
 
   <script>
+    let garciano = 0, nonGarciano = 0;
     const firebaseConfig = {
       apiKey: "AIzaSyB9oTiiW5iXfiDgcyrEktTBkEh1ZFmZ7Pc",
       authDomain: "flipbook-a5350.firebaseapp.com",
@@ -280,6 +284,10 @@ width:100%;
         const gender = data.studentSex || "";
         if (gender === "Male") male++;
         if (gender === "Female") female++;
+        
+        const isGarciano = data.isGarciano || false; // Assuming this field exists
+      if (isGarciano) garciano++;
+      else nonGarciano++;
 
         const course = data.studentCourse || "N/A";
         courseStats[course] = (courseStats[course] || 0) + 1;
@@ -287,7 +295,7 @@ width:100%;
         const row = document.createElement("tr");
         row.innerHTML = `
           <td><img src="${data.photoURL || 'https://via.placeholder.com/50'}" width="50" height="50"></td>
-          <td>${data.firstName || "N/A"}</td>
+        <td>${data.firstName || ''} ${data.middleName || ''} ${data.lastName || ''}</td>
           <td>${data.studentEmail || "N/A"}</td>
           <td>${gender}</td>
           <td>${course}</td>
@@ -302,11 +310,13 @@ width:100%;
 
       // Update stats
       totalStudentsEl.textContent = total;
-      pendingExamEl.textContent = 35; // Dummy value for pending exams
-      garcianoStatsValEl.textContent = `Garciano: 160, Non-Garciano: 80`; // Dummy value for Garciano stats
+      pendingExamEl.textContent = 8; // Dummy value for pending exams
+      
 
       // Render gender distribution chart
       renderGenderChart(male, female);
+      
+      renderGarcianoChart(garciano, nonGarciano);
       // Render course distribution chart
       renderCourseChart(courseStats);
     }).catch((error) => {
@@ -368,16 +378,50 @@ width:100%;
         }
       });
     }
+function renderGarcianoChart(garciano, nonGarciano) {
+  const ctx = document.getElementById('garcianoChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Garciano', 'Non-Garciano'],
+      datasets: [{
+        label: 'Number of Students',
+        data: [garciano, nonGarciano],
+        backgroundColor: ['#28a745', '#ffc107'],
+        borderRadius: 8,
+        barThickness: 50
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          display: false
+        },
+        title: {
+          display: true,
+          text: 'Garciano vs Non-Garciano Distribution'
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            stepSize: 1
+          }
+        }
+      }
+    }
+  });
+}
 
     document.getElementById('refresh-btn').addEventListener('click', () => {
-      // Refresh logic can be added here
-      alert('Data refreshed!');
-    });
+  location.reload(); // Refresh the browser
+});
 
-    document.getElementById('logout-btn').addEventListener('click', () => {
-      // Implement your logout logic here
-      alert('Logout functionality to be implemented.');
-    });
+document.getElementById('logout-btn').addEventListener('click', () => {
+  window.location.href = 'admin-login.html'; // Redirect to admin login page
+});
   </script>
 </body>
 </html>
