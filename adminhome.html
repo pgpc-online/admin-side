@@ -181,6 +181,50 @@
     height: 40px;
     padding: 0 12px;
   }
+  .profile-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+    border: 1px solid;
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+  z-index: 200;
+  width: 300px;
+  padding: 20px;
+}
+
+.popup-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.close-popup {
+  cursor: pointer;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 1.5rem;
+  color: #6b7280;
+}
+
+button {
+  margin-top: 10px;
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 10px 15px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #1d4ed8;
+}
+
   </style>  
 </head>  
 <body>  
@@ -196,13 +240,27 @@
         <button class="logout-btn" id="logout-btn" tabindex="0">Logout</button>  
       </div>  
     </nav>  
+
   </header>    <main role="main" aria-label="Admin dashboard main content">  
     <section class="hero" aria-label="Hero section">  
       <h1>Welcome to PGPC Admin Dashboard</h1>  
       <p>Manage student information, review statuses, and explore insightful statistics—all from one place.</p>  
       <button id="refresh-btn" aria-label="Refresh statistics">Refresh Data</button>  
-    </section>  <section class="stats-grid" aria-label="Key statistics cards">  
-  <article class="card" tabindex="0" role="region" aria-labelledby="students-info">  
+    </section> 
+    
+    <div id="profile-popup" class="profile-popup" style="display: none;">
+  <div class="popup-content">
+    <span class="close-popup" id="close-popup">&times;</span>
+    <img id="popup-profile-pic" src="" alt="Admin" style="width: 80px; height: 80px; border-radius: 50%;" />
+    <h3>Admin Profile</h3>
+    <button id="edit-profile-btn">Edit Profile</button>
+    <button id="change-password-btn">Change Password</button>
+    <button id="logout-popup-btn">Logout</button>
+  </div>
+</div>
+    
+    <section class="stats-grid" aria-label="Key statistics cards">  
+       <article class="card" tabindex="0" role="region" aria-labelledby="students-info">  
     <h2 id="students-info">Total Students</h2>  
     <div class="value" id="total-students">---</div>  
     <button id="view-students-btn" aria-describedby="students-info" onclick="window.location.href='student-info.html'">View Student Info</button>
@@ -245,7 +303,7 @@
       <th>Address</th>  
       <th>Birthdate</th>  
       <th>Phone</th>  
-      <th>Status</th>  
+      <th>Submitted At</th>  
     </tr>  
   </thead>  
   <tbody id="studentTable">  
@@ -307,7 +365,7 @@
           <td>${data.studentAddress || ''}</td>  
           <td>${data.studentDate || ''}</td>  
           <td>${data.studentNumber || ''}</td>  
-          <td>${"Pending"}</td>  
+          <td>${data.submittedAt?.toDate().toLocaleString() || "Pending"}</td>  
         `;  
         table.appendChild(row);  
       });  
@@ -426,6 +484,55 @@ function renderGarcianoChart(garciano, nonGarciano) {
     }  
   });  
   
+  const profilePic = document.getElementById("profile-pic");
+const profilePopup = document.getElementById("profile-popup");
+const closePopup = document.getElementById("close-popup");
+const editProfileBtn = document.getElementById("edit-profile-btn");
+const changePasswordBtn = document.getElementById("change-password-btn");
+const logoutPopupBtn = document.getElementById("logout-popup-btn");
+
+// Show the popup when the profile picture is clicked
+profilePic.addEventListener("click", () => {
+  profilePopup.style.display = "block";
+  const user = firebase.auth().currentUser ;
+  if (user) {
+    document.getElementById("popup-profile-pic").src = user.photoURL || "default-admin.png";
+  }
+});
+
+// Close the popup when the X is clicked
+closePopup.addEventListener("click", () => {
+  profilePopup.style.display = "none";
+});
+
+// Close the popup when clicking outside of it
+window.addEventListener("click", (event) => {
+  if (event.target === profilePopup) {
+    profilePopup.style.display = "none";
+  }
+});
+
+// Logout from the popup
+logoutPopupBtn.addEventListener("click", () => {
+  firebase.auth().signOut().then(() => {
+    window.location.href = 'index.html'; // Redirect to admin login
+  }).catch((error) => {
+    console.error("Error during logout:", error);
+    alert("Logout failed. Please try again.");
+  });
+});
+
+// Add functionality for edit profile and change password buttons as needed
+editProfileBtn.addEventListener("click", () => {
+  // Implement edit profile functionality
+  alert("Edit Profile functionality not implemented yet.");
+});
+
+changePasswordBtn.addEventListener("click", () => {
+  // Implement change password functionality
+  alert("Change Password functionality not implemented yet.");
+});
+
   
     document.getElementById('refresh-btn').addEventListener('click', () => {  
   location.reload(); // Refresh the browser  
@@ -441,4 +548,4 @@ document.getElementById('logout-btn').addEventListener('click', () => {
   });  
 });  
   </script>  </body>  
-</html>
+  </html>
