@@ -200,6 +200,9 @@
   <!-- Firebase Auth SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
   <script>
     // Your Firebase project configuration
     const firebaseConfig = {
@@ -279,8 +282,21 @@
   // Handle profile photo upload if provided
   const file = profilePhotoInput.files[0];
   if (file) {
-    // You can implement the logic to upload the file to Firebase Storage here
-  }
+  const storageRef = firebase.storage().ref();
+  const photoRef = storageRef.child(`admin_profiles/${userCredential.user.uid}.jpg`);
+  await photoRef.put(file);
+  const photoURL = await photoRef.getDownloadURL();
+
+  // Update Firebase Auth profile with photo
+  await userCredential.user.updateProfile({
+    photoURL: photoURL
+  });
+
+  // Optional: Save email/photoURL to Firebase Database for reference
+  firebase.database().ref('adminUsers/' + userCredential.user.uid).set({
+    email: email,
+    photoURL: photoURL
+  });
 }
         messageDiv.textContent = '';
         // On successful login/signup redirect to adminhome.html
