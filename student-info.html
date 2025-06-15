@@ -265,16 +265,16 @@ background-color: #111827;
     }
 
     function deleteStudent(id, button) {
-    if (confirm("Are you sure you want to archive this student?")) {
-        db.collection("studentApplications").doc(id).update({
-            isDeleted: true
-        }).then(() => {
+    if (confirm("Are you sure you want to permanently delete this student? This action cannot be undone.")) {
+        db.collection("studentApplications").doc(id).delete()
+        .then(() => {
             const row = button.closest("tr");
-            row.remove();
-            alert("Student archived successfully.");
-        }).catch((error) => {
-            console.error("Error archiving student: ", error);
-            alert("Failed to archive. Please try again.");
+            row.remove(); // Remove the row from the UI
+            alert("Student permanently deleted.");
+        })
+        .catch((error) => {
+            console.error("Error deleting student: ", error);
+            alert("Failed to delete the student. Please try again.");
         });
     }
 }
