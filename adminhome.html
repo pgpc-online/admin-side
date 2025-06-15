@@ -407,7 +407,7 @@ row.innerHTML = `
   <td>${data.studentNumber || ''}</td>
   <td>${data.submittedAt?.toDate().toLocaleString() || "Pending"}</td>
   <td><img class="psa-image" src="${data.psaURL || 'https://via.placeholder.com/50'}" width="50" height="50"></td> <!-- PSA Photo -->
-<td><img class="goodmoral-image" src="${data.goodmoralURL || 'https://via.placeholder.com/50'}" width="50" height="50"></td> <!-- Good Moral Photo -->
+<td><img class="goodmoral-image" src="${data.goodMoralURL || 'https://via.placeholder.com/50'}" width="50" height="50"></td> <!-- Good Moral Photo -->
 `;
 table.appendChild(row);
 
