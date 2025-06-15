@@ -362,8 +362,11 @@ button:hover {
       appId: "1:570378601966:web:96ebb77badba7e33107aff"  
     };  
   
-    firebase.initializeApp(firebaseConfig);  
-    const db = firebase.firestore();  
+    if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+} else {
+  firebase.app();
+}  
   
     const table = document.getElementById("studentTable");  
     const totalStudentsEl = document.getElementById('total-students');  
