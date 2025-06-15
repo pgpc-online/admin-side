@@ -181,34 +181,33 @@
   };
 
   firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
-  const table = document.getElementById("studentTable");
+const db = firebase.firestore();
+const table = document.getElementById("studentTable");
 
-  db.collection("studentApplications")
-    .where("isDeleted", "==", false)
-    .orderBy("submittedAt", "desc")
-    .get()
-    .then((querySnapshot) => {
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td><img src="${data.photoURL || 'https://via.placeholder.com/50'}" width="50" height="50"></td>
-          <td>${data.firstName || ''} ${data.middleName || ''} ${data.lastName || ''}</td>
-          <td>${data.studentEmail || "N/A"}</td>
-          <td>${data.studentSex || "N/A"}</td>
-          <td>${data.studentCourse || "N/A"}</td>
-          <td>${data.guardianName || ''}</td>
-          <td>${data.studentAddress || ''}</td>
-          <td>${data.birthDate || ''}</td>
-          <td>${data.studentNumber || ''}</td>
-          <td>Pending</td>
-        `;
-        table.appendChild(row);
-      });
-    }).catch((error) => {
-      console.error("Error fetching data:", error);
+db.collection("studentApplications")
+  .orderBy("submittedAt", "desc")
+  .get()
+  .then((querySnapshot) => {
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td><img src="${data.photoURL || 'https://via.placeholder.com/50'}" width="50" height="50"></td>
+        <td>${data.firstName || ''} ${data.middleName || ''} ${data.lastName || ''}</td>
+        <td>${data.studentEmail || "N/A"}</td>
+        <td>${data.studentSex || "N/A"}</td>
+        <td>${data.studentCourse || "N/A"}</td>
+        <td>${data.guardianName || ''}</td>
+        <td>${data.studentAddress || ''}</td>
+        <td>${data.birthDate || ''}</td>
+        <td>${data.studentNumber || ''}</td>
+        <td>Pending</td>
+      `;
+      table.appendChild(row);
     });
+  }).catch((error) => {
+    console.error("Error fetching data:", error);
+  });
   </script>
 </body>
 </html>
