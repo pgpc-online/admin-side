@@ -157,7 +157,7 @@
           <th>Birthdate</th>
           <th>Phone</th>
           <th>Status</th>
-          <th>Actions</th>
+          
         </tr>
       </thead>
       <tbody id="studentTable">
@@ -172,90 +172,43 @@
 
   <script>
     const firebaseConfig = {
-      apiKey: "AIzaSyB9oTiiW5iXfiDgcyrEktTBkEh1ZFmZ7Pc",
-      authDomain: "flipbook-a5350.firebaseapp.com",
-      projectId: "flipbook-a5350",
-      storageBucket: "flipbook-a5350.appspot.com",
-      messagingSenderId: "570378601966",
-      appId: "1:570378601966:web:96ebb77badba7e33107aff"
-    };
+    apiKey: "AIzaSyB9oTiiW5iXfiDgcyrEktTBkEh1ZFmZ7Pc",
+    authDomain: "flipbook-a5350.firebaseapp.com",
+    projectId: "flipbook-a5350",
+    storageBucket: "flipbook-a5350.appspot.com",
+    messagingSenderId: "570378601966",
+    appId: "1:570378601966:web:96ebb77badba7e33107aff"
+  };
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    const table = document.getElementById("studentTable");
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+  const table = document.getElementById("studentTable");
 
-    db.collection("studentApplications")
-      .where("isDeleted", "==", false)
-      .orderBy("submittedAt", "desc")
-      .get()
-      .then((querySnapshot) => {
-        querySnapshot.forEach((doc) => {
-          const data = doc.data();
-          const row = document.createElement("tr");
-          row.innerHTML = `
-            <td><img src="${data.photoURL || 'https://via.placeholder.com/50'}" width="50" height="50"></td>
-            <td>${data.firstName || ''} ${data.middleName || ''} ${data.lastName || ''}</td>
-            <td>${data.studentEmail || "N/A"}</td>
-            <td>${data.studentSex || "N/A"}</td>
-            <td>${data.studentCourse || "N/A"}</td>
-            <td>${data.guardianName || ''}</td>
-            <td>${data.studentAddress || ''}</td>
-            <td>${data.birthDate || ''}</td>
-            <td>${data.studentNumber || ''}</td>
-            <td>Pending</td>
-            <td>
-              <button class="edit-btn" onclick="editStudent('${doc.id}', this)">Edit</button>
-              <button class="save-btn" style="display:none;" onclick="saveStudent('${doc.id}', this)">Save</button>
-            </td>
-          `;
-          table.appendChild(row);
-        });
-      }).catch((error) => {
-        console.error("Error fetching data:", error);
+  db.collection("studentApplications")
+    .where("isDeleted", "==", false)
+    .orderBy("submittedAt", "desc")
+    .get()
+    .then((querySnapshot) => {
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td><img src="${data.photoURL || 'https://via.placeholder.com/50'}" width="50" height="50"></td>
+          <td>${data.firstName || ''} ${data.middleName || ''} ${data.lastName || ''}</td>
+          <td>${data.studentEmail || "N/A"}</td>
+          <td>${data.studentSex || "N/A"}</td>
+          <td>${data.studentCourse || "N/A"}</td>
+          <td>${data.guardianName || ''}</td>
+          <td>${data.studentAddress || ''}</td>
+          <td>${data.birthDate || ''}</td>
+          <td>${data.studentNumber || ''}</td>
+          <td>Pending</td>
+        `;
+        table.appendChild(row);
       });
-
-    function editStudent(id, button) {
-      const row = button.closest("tr");
-      const cells = row.querySelectorAll("td");
-      cells.forEach((cell, index) => {
-        if (index < 10) {
-          const input = document.createElement("input");
-          input.value = cell.innerText;
-          cell.innerHTML = "";
-          cell.appendChild(input);
-        }
-      });
-      button.style.display = "none";
-      row.querySelector(".save-btn").style.display = "inline-block";
-    }
-
-    function saveStudent(id, button) {
-      const row = button.closest("tr");
-      const cells = row.querySelectorAll("td");
-
-      const updatedData = {
-        firstName: cells[1].querySelector("input").value,
-        studentEmail: cells[2].querySelector("input").value,
-        studentSex: cells[3].querySelector("input").value,
-        studentCourse: cells[4].querySelector("input").value,
-        guardianName: cells[5].querySelector("input").value,
-        studentAddress: cells[6].querySelector("input").value,
-        birthDate: cells[7].querySelector("input").value,
-        studentNumber: cells[8].querySelector("input").value,
-      };
-
-      db.collection("studentApplications").doc(id).update(updatedData).then(() => {
-        cells.forEach((cell, index) => {
-          if (index < 10) {
-            cell.innerText = updatedData[Object.keys(updatedData)[index - 1]] || "";
-          }
-        });
-        button.style.display = "none";
-        row.querySelector(".edit-btn").style.display = "inline-block";
-      }).catch((error) => {
-        console.error("Error updating document: ", error);
-      });
-    }
+    }).catch((error) => {
+      console.error("Error fetching data:", error);
+    });
   </script>
 </body>
 </html>
