@@ -371,8 +371,10 @@ button:hover {
       });  
   
       // Update stats  
-      totalStudentsEl.textContent = total;  
-      pendingExamEl.textContent = 8; // Dummy value for pending exams  
+      // Update stats  
+totalStudentsEl.textContent = total;  
+pendingExamEl.textContent = total; // Set pending exams to the same value as total students
+
         
   
       // Render gender distribution chart  
@@ -496,7 +498,7 @@ profilePic.addEventListener("click", () => {
   profilePopup.style.display = "block";
   const user = firebase.auth().currentUser ;
   if (user) {
-    document.getElementById("popup-profile-pic").src = user.photoURL || "default-admin.png";
+    document.getElementById("popup-profile-pic").src = user.photoURL || "pgpc.png";
   }
 });
 
