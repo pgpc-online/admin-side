@@ -267,18 +267,14 @@ background-color: #111827;
     // ✅ SOFT DELETE FUNCTION
     function deleteStudent(id, button) {
         if (confirm("Are you sure you want to archive this student?")) {
-            db.collection("studentApplications").doc(id).update({
-                isDeleted: true
-            }).then(() => {
-                const row = button.closest("tr");
-                row.remove();
-                alert("Student archived successfully.");
-            }).catch((error) => {
-                console.error("Error archiving student: ", error);
-                alert("Failed to archive. Please try again.");
-            });
-        }
-    }
+            // One-time script to mark all existing docs as not deleted
+db.collection("studentApplications").get().then((querySnapshot) => {
+  querySnapshot.forEach((doc) => {
+    db.collection("studentApplications").doc(doc.id).update({
+      isDeleted: false
+    });
+  });
+});
     </script>
 </body>
 </html>
