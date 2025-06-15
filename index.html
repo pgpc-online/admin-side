@@ -152,6 +152,7 @@
       text-align: center;
       min-height: 1.5rem;
       color: #dc2626;
+      white-space: pre-wrap;
     }
 
     .toggle-auth {
@@ -161,16 +162,32 @@
       text-align: center;
     }
 
-.toggle-auth button {
-  background: none;
-  color: #2563eb;
-  padding: 0.4rem 1rem;
-  border-radius: 0.5rem;
-  margin-left: 0.5rem;
-}
+    .toggle-auth button {
+      background: none;
+      color: #2563eb;
+      padding: 0.4rem 1rem;
+      border-radius: 0.5rem;
+      margin-left: 0.5rem;
+      cursor: pointer;
+      border: none;
+      font-weight: 600;
+      font-size: 1rem;
+    }
 
     .toggle-auth button:hover {
       text-decoration: underline;
+    }
+
+    .resend-verification {
+      margin-top: 0.7rem;
+      text-align: center;
+      color: #2563eb;
+      cursor: pointer;
+      font-weight: 600;
+      user-select: none;
+      text-decoration: underline;
+      display: none;
+      font-size: 0.95rem;
     }
 
     .visually-hidden {
@@ -188,17 +205,17 @@
 </head>
 <body>
   <main class="container" role="main" aria-label="Admin login area">
-    <img src="templates/pgpc.png" width="70" />
-    <h1>Admin Login</h1>
-    <p class="subtitle">Sign in to access the admin dashboard</p>
+    <img src="templates/pgpc.png" width="70" alt="PGPC Logo" />
+    <h1 id="pageTitle">Admin Login</h1>
+    <p class="subtitle" id="pageSubtitle">Sign in to access the admin dashboard</p>
 
     <form id="auth-form" novalidate>
       <label for="email">Email address</label>
-      <input type="email" id="email" placeholder="admin@example.com" required />
+      <input type="email" id="email" placeholder="admin@example.com" required autocomplete="username" />
 
       <div class="password-wrapper">
-        <input type="password" id="password" placeholder="Enter Password" required />
-        <span class="toggle-password" id="toggle-password" role="button" tabindex="0" aria-label="Show password">👁️</span>
+        <input type="password" id="password" placeholder="Enter Password" required autocomplete="current-password" />
+        <span class="toggle-password" id="toggle-password" role="button" tabindex="0" aria-label="Show password" title="Show password">👁️</span>
       </div>
 
       <label for="profile-photo" id="profile-photo-label" style="display: none;">Profile Photo</label>
@@ -208,10 +225,11 @@
     </form>
 
     <div class="message" id="message" role="alert" aria-live="assertive"></div>
+    <div class="resend-verification" id="resend-verification" tabindex="0" role="button" aria-label="Resend verification email">Resend verification email</div>
 
-    <div class="toggle-auth">
+    <div class="toggle-auth" id="toggle-auth">
       <span id="toggle-text">Don't have an account?</span>
-      <button id="toggle-btn">Sign up</button>
+      <button id="toggle-btn" aria-haspopup="true" aria-controls="auth-form">Sign up</button>
     </div>
   </main>
 
@@ -246,19 +264,35 @@
     const toggleBtn = document.getElementById('toggle-btn');
     const toggleText = document.getElementById('toggle-text');
     const togglePasswordBtn = document.getElementById('toggle-password');
+    const resendVerificationLink = document.getElementById('resend-verification');
+    const pageTitle = document.getElementById('pageTitle');
+    const pageSubtitle = document.getElementById('pageSubtitle');
 
     let isLogin = true;
+    let lastUserForResend = null;
 
     toggleBtn.addEventListener('click', (e) => {
       e.preventDefault();
       isLogin = !isLogin;
+
       submitBtn.textContent = isLogin ? 'Login' : 'Sign up';
       toggleText.textContent = isLogin ? "Don't have an account?" : "Already have an account?";
       toggleBtn.textContent = isLogin ? 'Sign up' : 'Login';
+
       profilePhotoInput.style.display = isLogin ? 'none' : 'block';
       profilePhotoLabel.style.display = isLogin ? 'none' : 'block';
+
       passwordInput.autocomplete = isLogin ? "current-password" : "new-password";
+
       messageDiv.textContent = '';
+      messageDiv.style.color = '#dc2626'; // default error red
+      resendVerificationLink.style.display = 'none';
+      lastUserForResend = null;
+
+      pageTitle.textContent = isLogin ? "Admin Login" : "Admin Registration";
+      pageSubtitle.textContent = isLogin ? "Sign in to access the admin dashboard" : "Create an admin account";
+
+      passwordInput.value = '';
       emailInput.focus();
     });
 
@@ -278,34 +312,98 @@
       }
     });
 
+    resendVerificationLink.addEventListener('click', async () => {
+      if (lastUserForResend) {
+        try {
+          await lastUserForResend.sendEmailVerification();
+          messageDiv.style.color = 'green';
+          messageDiv.textContent = 'Verification email resent. Please check your inbox.';
+        } catch (error) {
+          messageDiv.style.color = 'red';
+          messageDiv.textContent = 'Failed to resend verification email: ' + error.message;
+        }
+      }
+    });
+
+    resendVerificationLink.addEventListener('keydown', (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        resendVerificationLink.click();
+      }
+    });
+
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+
       const email = emailInput.value.trim();
       const password = passwordInput.value;
+
       messageDiv.textContent = '';
+      messageDiv.style.color = '#dc2626'; // default red
       submitBtn.disabled = true;
       submitBtn.textContent = isLogin ? 'Logging in...' : 'Signing up...';
+      resendVerificationLink.style.display = 'none';
+      lastUserForResend = null;
 
       try {
         let userCredential;
+
         if (isLogin) {
+          // Login flow
           userCredential = await auth.signInWithEmailAndPassword(email, password);
+          const user = userCredential.user;
+
+          if (!user.emailVerified) {
+            messageDiv.style.color = 'red';
+            messageDiv.textContent = 'Please verify your email before logging in.';
+            resendVerificationLink.style.display = 'inline-block';
+            lastUserForResend = user;
+            await auth.signOut(); // prevent access until verification
+            return;
+          }
+
+          // Successful login - redirect to adminhome
+          messageDiv.style.color = 'green';
+          messageDiv.textContent = 'Login successful! Redirecting to dashboard...';
+          setTimeout(() => {
+            window.location.href = 'adminhome.html';
+          }, 1500);
+
         } else {
+          // Registration flow
           userCredential = await auth.createUserWithEmailAndPassword(email, password);
+          const user = userCredential.user;
+
+          // Send email verification
+          await user.sendEmailVerification();
+
+          // Upload profile photo if any
           const file = profilePhotoInput.files[0];
           if (file) {
             const storageRef = firebase.storage().ref();
-            const photoRef = storageRef.child(`admin_profiles/${userCredential.user.uid}.jpg`);
+            const photoRef = storageRef.child(`admin_profiles/${user.uid}.jpg`);
             await photoRef.put(file);
             const photoURL = await photoRef.getDownloadURL();
-            await userCredential.user.updateProfile({ photoURL });
-            firebase.database().ref('adminUsers/' + userCredential.user.uid).set({
+            await user.updateProfile({ photoURL });
+            firebase.database().ref('adminUsers/' + user.uid).set({
               email,
               photoURL
             });
+          } else {
+            firebase.database().ref('adminUsers/' + user.uid).set({
+              email,
+              photoURL: null
+            });
           }
+
+          messageDiv.style.color = 'green';
+          messageDiv.textContent = 'Account created! A verification email has been sent. Please verify your email before logging in.';
+          resendVerificationLink.style.display = 'inline-block';
+          lastUserForResend = user;
+
+          // Clear password field after registration
+          passwordInput.value = '';
         }
-        window.location.href = 'adminhome.html';
       } catch (error) {
         let msg = 'An error occurred. Please try again.';
         switch (error.code) {
@@ -326,3 +424,4 @@
   </script>
 </body>
 </html>
+
