@@ -332,8 +332,9 @@ button:hover {
       <th>Address</th>  
       <th>Birthdate</th>  
       <th>Phone</th>  
-<th>PSA Photo</th>
-      <th>Good Moral Photo</th>
+<th>PSA</th>
+      <th>Good Moral</th>
+<th>Barangay Residency</th>
       <th>Submitted At</th>  
     </tr>  
   </thead>  
@@ -405,7 +406,7 @@ button:hover {
         // Create and append table row
         const row = document.createElement("tr");
         row.innerHTML = `
-          <td><img src="${data.photoURL || 'https://via.placeholder.com/50'}" width="50" height="50"></td>
+          <td><img class="profile-image" src="${data.photoURL || 'https://via.placeholder.com/50'}" width="50" height="50"></td>
           <td>${data.firstName || ""} ${data.middleName || ""} ${data.lastName || ""}</td>
           <td>${data.studentEmail || "N/A"}</td>
           <td>${gender}</td>
@@ -416,6 +417,7 @@ button:hover {
           <td>${data.studentNumber || ""}</td>
           <td><img class="psa-image" src="${data.psaURL || 'https://via.placeholder.com/50'}" width="50" height="50"></td>
           <td><img class="goodmoral-image" src="${data.goodMoralURL || 'https://via.placeholder.com/50'}" width="50" height="50"></td>
+<td><img class="barangay-image" src="${data.brgyPhotoURL || 'https://via.placeholder.com/50'}" width="50" height="50"></td>
           <td>${submittedAt}</td>
         `;
         table.appendChild(row);
@@ -514,7 +516,7 @@ button:hover {
   const closeModal = document.getElementById("close-modal");
 
   table.addEventListener("click", (event) => {
-    if (event.target.classList.contains("psa-image") || event.target.classList.contains("goodmoral-image")) {
+    if (event.target.classList.contains("psa-image") ||event.target.classList.contains("profile-image") || event.target.classList.contains("barangay-image")|| event.target.classList.contains("goodmoral-image")) {
       modal.style.display = "flex";
       modalImage.src = event.target.src;
     }
