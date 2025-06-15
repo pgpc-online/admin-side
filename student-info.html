@@ -1,189 +1,183 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Admin Dashboard - PGPC</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        /* Base and reset */
-        *, *::before, *::after {
-            box-sizing: border-box;
-        }
-        body {
-            margin: 0;
-            font-family: 'Inter', sans-serif;
-            background: #f5f7fa;
-            color: #6b7280;
-            line-height: 1.6;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        a {
-            color: inherit;
-            text-decoration: none;
-        }
-        /* Sticky top nav */
-        header {
-            position: sticky;
-            top: 0;
-            width: 1250px;
-            backdrop-filter: saturate(180%) blur(10px);
-            background: rgba(255, 255, 255, 0.8);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            z-index: 100;
-        }
-        nav {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 1rem 2rem;
-        }
-        .logo {
-            font-weight: 800;
-            font-size: 1.5rem;
-            color: #111827;
-        }
-        .nav-links {
-            display: flex;
-            gap: 1.5rem;
-            font-weight: 600;
-            font-size: 1rem;
-            color: #374151;
-        }
-        .nav-links a {
-            transition: color 0.3s ease;
-        }
-        .nav-links a:hover,
-        .nav-links a:focus {
-            color: #2563eb;
-        }
-        .logout-btn {
-            background-color: #dc3545;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            padding: 10px 15px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        .logout-btn:hover {
-            background-color: #c82333;
-        }
-        /* Main container */
-        main {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 4rem 2rem 6rem;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 3.5rem;
-        }
-        /* Table styles */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 0px;
-            background: white;
-                opacity: 0;
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin Dashboard - PGPC</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: #f5f7fa;
+      color: #6b7280;
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+    header {
+      position: sticky;
+      top: 0;
+      width: 1250px;
+      backdrop-filter: saturate(180%) blur(10px);
+      background: rgba(255, 255, 255, 0.8);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      z-index: 100;
+    }
+    nav {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 2rem;
+    }
+    .logo {
+      font-weight: 800;
+      font-size: 1.5rem;
+      color: #111827;
+    }
+    .nav-links {
+      display: flex;
+      gap: 1.5rem;
+      font-weight: 600;
+      font-size: 1rem;
+      color: #374151;
+    }
+    .nav-links a {
+      transition: color 0.3s ease;
+    }
+    .nav-links a:hover,
+    .nav-links a:focus {
+      color: #2563eb;
+    }
+    .logout-btn {
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 15px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .logout-btn:hover {
+      background-color: #c82333;
+    }
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 4rem 2rem 6rem;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 3.5rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 0px;
+      background: white;
+      opacity: 0;
       animation-name: fadeIn;
       animation-duration: 1s;
       animation-fill-mode: forwards;
       animation-delay: 1s;
     }
-
     @keyframes fadeIn {
       from { opacity: 0; }
       to { opacity: 1; }
     }
-        }
-        th, td {
-            padding: 20px;
-            border: 1px solid #ddd;
-            text-align: left;
-        }
-        th {
-            background-color: #2563eb;
-            color: #fff;
-            padding: 15px;
-        }
-        /* Footer */
-        footer {
-            text-align: center;
-            color: #9ca3af;
-            padding: 2rem 1rem 2rem;
-            font-size: 0.9rem;
-        }
-#back-home{
-background-color: #111827;  
+    th, td {
+      padding: 20px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+    th {
+      background-color: #2563eb;
+      color: #fff;
+      padding: 15px;
+    }
+    footer {
+      text-align: center;
+      color: #9ca3af;
+      padding: 2rem 1rem 2rem;
+      font-size: 0.9rem;
+    }
+    #back-home {
+      background-color: #111827;  
       color: white;  
       border: none;  
       border-radius: 0.75rem;
-    height: 40px;
-    padding: 0 12px;
-    margin: 0 20px;
-    width: 150px;
-}
-    </style>
+      height: 40px;
+      padding: 0 12px;
+      margin: 0 20px;
+      width: 150px;
+    }
+  </style>
 </head>
 <body>
-    <header role="banner">
-        <nav role="navigation" aria-label="Primary navigation">
-            <div id="admin-profile" style="display: flex; align-items: center; gap: 10px;">
-                <img id="profile-pic" src="" alt="Admin" style="width: 40px; height: 40px; border-radius: 50%;" />
-            </div>
-            <div class="logo" tabindex="0">PGPC Admin</div>
-            <div class="nav-links" id="primary-navigation">
-                <a href="#" tabindex="0">Dashboard</a>
-                <a href="#" tabindex="0">Students</a>
-                <a href="#" tabindex="0">Statistics</a>
-                <button class="logout-btn" id="logout-btn" tabindex="0">Logout</button>
-            </div>
-        </nav>
-    </header>
-    
-    <main role="main" aria-label="Admin dashboard main content">
-        <table>
-            <thead>
-                <tr>
-                    <th>Photo</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Gender</th>
-                    <th>Course</th>
-                    <th>Guardian</th>
-                    <th>Address</th>
-                    <th>Birthdate</th>
-                    <th>Phone</th>
-                    <th>Status </th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody id="studentTable">
-                <!-- Student rows will be populated here -->
-            </tbody>
-        </table>
-    </main>
-    <footer role="contentinfo">
-        © 2025 PGPC. All rights reserved.
-    </footer>
+  <header role="banner">
+    <nav role="navigation" aria-label="Primary navigation">
+      <div id="admin-profile" style="display: flex; align-items: center; gap: 10px;">
+        <img id="profile-pic" src="" alt="Admin" style="width: 40px; height: 40px; border-radius: 50%;" />
+      </div>
+      <div class="logo" tabindex="0">PGPC Admin</div>
+      <div class="nav-links" id="primary-navigation">
+        <a href="#" tabindex="0">Dashboard</a>
+        <a href="#" tabindex="0">Students</a>
+        <a href="#" tabindex="0">Statistics</a>
+        <button class="logout-btn" id="logout-btn" tabindex="0">Logout</button>
+      </div>
+    </nav>
+  </header>
 
-    <script>
+  <main role="main" aria-label="Admin dashboard main content">
+    <table>
+      <thead>
+        <tr>
+          <th>Photo</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Gender</th>
+          <th>Course</th>
+          <th>Guardian</th>
+          <th>Address</th>
+          <th>Birthdate</th>
+          <th>Phone</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="studentTable">
+        <!-- Student rows will be populated here -->
+      </tbody>
+    </table>
+  </main>
+
+  <footer role="contentinfo">
+    © 2025 PGPC. All rights reserved.
+  </footer>
+
+  <script>
     const firebaseConfig = {
-        apiKey: "AIzaSyB9oTiiW5iXfiDgcyrEktTBkEh1ZFmZ7Pc",
-        authDomain: "flipbook-a5350.firebaseapp.com",
-        projectId: "flipbook-a5350",
-        storageBucket: "flipbook-a5350.appspot.com",
-        messagingSenderId: "570378601966",
-        appId: "1:570378601966:web:96ebb77badba7e33107aff"
+      apiKey: "AIzaSyB9oTiiW5iXfiDgcyrEktTBkEh1ZFmZ7Pc",
+      authDomain: "flipbook-a5350.firebaseapp.com",
+      projectId: "flipbook-a5350",
+      storageBucket: "flipbook-a5350.appspot.com",
+      messagingSenderId: "570378601966",
+      appId: "1:570378601966:web:96ebb77badba7e33107aff"
     };
 
     firebase.initializeApp(firebaseConfig);
@@ -196,88 +190,72 @@ background-color: #111827;
       .get()
       .then((querySnapshot) => {
         querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            const row = document.createElement("tr");
-            row.innerHTML = `
-                <td><img src="${data.photoURL || 'https://via.placeholder.com/50'}" width="50" height="50"></td>
-                <td>${data.firstName || ''} ${data.middleName || ''} ${data.lastName || ''}</td>
-                <td>${data.studentEmail || "N/A"}</td>
-                <td>${data.studentSex || "N/A"}</td>
-                <td>${data.studentCourse || "N/A"}</td>
-                <td>${data.guardianName || ''}</td>
-                <td>${data.studentAddress || ''}</td>
-                <td>${data.birthDate || ''}</td>
-                <td>${data.studentNumber || ''}</td>
-                <td>Pending</td>
-                <td>
-                    <button class="edit-btn" onclick="editStudent('${doc.id}', this)">Edit</button>
-                    <button class="save-btn" style="display:none;" onclick="saveStudent('${doc.id}', this)">Save</button>
-                    <button class="delete-btn" onclick="deleteStudent('${doc.id}', this)">Delete</button>
-                </td>
-            `;
-            table.appendChild(row);
+          const data = doc.data();
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td><img src="${data.photoURL || 'https://via.placeholder.com/50'}" width="50" height="50"></td>
+            <td>${data.firstName || ''} ${data.middleName || ''} ${data.lastName || ''}</td>
+            <td>${data.studentEmail || "N/A"}</td>
+            <td>${data.studentSex || "N/A"}</td>
+            <td>${data.studentCourse || "N/A"}</td>
+            <td>${data.guardianName || ''}</td>
+            <td>${data.studentAddress || ''}</td>
+            <td>${data.birthDate || ''}</td>
+            <td>${data.studentNumber || ''}</td>
+            <td>Pending</td>
+            <td>
+              <button class="edit-btn" onclick="editStudent('${doc.id}', this)">Edit</button>
+              <button class="save-btn" style="display:none;" onclick="saveStudent('${doc.id}', this)">Save</button>
+            </td>
+          `;
+          table.appendChild(row);
         });
-    }).catch((error) => {
+      }).catch((error) => {
         console.error("Error fetching data:", error);
-    });
+      });
 
     function editStudent(id, button) {
-        const row = button.closest("tr");
-        const cells = row.querySelectorAll("td");
-        cells.forEach((cell, index) => {
-            if (index < 10) { // Exclude the last (Actions) cell
-                const input = document.createElement("input");
-                input.value = cell.innerText;
-                cell.innerHTML = "";
-                cell.appendChild(input);
-            }
-        });
-        button.style.display = "none";
-        row.querySelector(".save-btn").style.display = "inline-block";
+      const row = button.closest("tr");
+      const cells = row.querySelectorAll("td");
+      cells.forEach((cell, index) => {
+        if (index < 10) {
+          const input = document.createElement("input");
+          input.value = cell.innerText;
+          cell.innerHTML = "";
+          cell.appendChild(input);
+        }
+      });
+      button.style.display = "none";
+      row.querySelector(".save-btn").style.display = "inline-block";
     }
 
     function saveStudent(id, button) {
-        const row = button.closest("tr");
-        const cells = row.querySelectorAll("td");
+      const row = button.closest("tr");
+      const cells = row.querySelectorAll("td");
 
-        const updatedData = {
-            firstName: cells[1].querySelector("input").value,
-            studentEmail: cells[2].querySelector("input").value,
-            studentSex: cells[3].querySelector("input").value,
-            studentCourse: cells[4].querySelector("input").value,
-            guardianName: cells[5].querySelector("input").value,
-            studentAddress: cells[6].querySelector("input").value,
-            birthDate: cells[7].querySelector("input").value,
-            studentNumber: cells[8].querySelector("input").value,
-        };
+      const updatedData = {
+        firstName: cells[1].querySelector("input").value,
+        studentEmail: cells[2].querySelector("input").value,
+        studentSex: cells[3].querySelector("input").value,
+        studentCourse: cells[4].querySelector("input").value,
+        guardianName: cells[5].querySelector("input").value,
+        studentAddress: cells[6].querySelector("input").value,
+        birthDate: cells[7].querySelector("input").value,
+        studentNumber: cells[8].querySelector("input").value,
+      };
 
-        db.collection("studentApplications").doc(id).update(updatedData).then(() => {
-            cells.forEach((cell, index) => {
-                if (index < 10) {
-                    cell.innerText = updatedData[Object.keys(updatedData)[index - 1]] || "";
-                }
-            });
-            button.style.display = "none";
-            row.querySelector(".edit-btn").style.display = "inline-block";
-        }).catch((error) => {
-            console.error("Error updating document: ", error);
+      db.collection("studentApplications").doc(id).update(updatedData).then(() => {
+        cells.forEach((cell, index) => {
+          if (index < 10) {
+            cell.innerText = updatedData[Object.keys(updatedData)[index - 1]] || "";
+          }
         });
+        button.style.display = "none";
+        row.querySelector(".edit-btn").style.display = "inline-block";
+      }).catch((error) => {
+        console.error("Error updating document: ", error);
+      });
     }
-
-    function deleteStudent(id, button) {
-    if (confirm("Are you sure you want to permanently delete this student? This action cannot be undone.")) {
-        db.collection("studentApplications").doc(id).delete()
-        .then(() => {
-            const row = button.closest("tr");
-            row.remove(); // Remove the row from the UI
-            alert("Student permanently deleted.");
-        })
-        .catch((error) => {
-            console.error("Error deleting student: ", error);
-            alert("Failed to delete the student. Please try again.");
-        });
-    }
-}
-    </script>
+  </script>
 </body>
 </html>
